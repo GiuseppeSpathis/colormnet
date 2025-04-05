@@ -89,7 +89,7 @@ for si, stage in enumerate(stages_to_perform):
         "learning_rate": 0.02,
         "architecture": "CNN",
         "dataset": "DAVIS_Videvo",
-        "epochs": 160000,
+        "epochs": 200, #160000,
         'batchsize': config['s2_batch_size'],
         }
     )
@@ -195,7 +195,7 @@ for si, stage in enumerate(stages_to_perform):
     """
     Determine max epoch
     """
-    total_epoch = math.ceil(config['iterations']/len(train_loader))
+    total_epoch = 200 #math.ceil(config['iterations']/len(train_loader))
     current_epoch = total_iter // len(train_loader)
     print(f'We approximately use {total_epoch} epochs.')
     if stage != '0':
