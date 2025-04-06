@@ -25,8 +25,6 @@ The original Colorment model was fine-tuned using the custom dataset described a
 
 The performance of the fine-tuned model was assessed through both qualitative and quantitative analysis.
 
-* **Qualitative Analysis:** 
-
 ### Qualitative analysis Video Psycho
 
 <table>
@@ -46,7 +44,7 @@ The performance of the fine-tuned model was assessed through both qualitative an
   </tr>
 </table>
 
-* **Quantitative Analysis:**
+### Quantitative Analysis
     * **Metric:** The Structural Similarity Index (SSIM) was used to quantitatively measure the similarity between the model's output and ground truth frames.
     * **Results:** The fine-tuning resulted in a measurable improvement in the model's performance according to the SSIM metric. An average increase of **0.04** in the SSIM score was observed post-tuning.
     * **Detailed Report:** For a detailed breakdown of the quantitative results across the dataset, please refer to the spreadsheet: `ssim_results4000it.xlsx`.
