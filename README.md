@@ -1,6 +1,6 @@
 # Colorment Fork: Fine-tuning for Enhanced Light Perception on Reflective Surfaces
 
-This repository is a fork of the original [Colorment](link-to-original-colorment-repo-if-available) project. The primary goal of this work is to fine-tune the model to improve its perception and rendering of light, particularly how it interacts with reflective surfaces like aluminum under diverse environmental conditions.
+This repository is a fork of the original [Colorment](https://github.com/yyang181/colormnet) project. The primary goal of this work is to fine-tune the model to improve its perception and rendering of light, particularly how it interacts with reflective surfaces like aluminum under diverse environmental conditions.
 
 ## Custom Dataset for Fine-tuning
 
