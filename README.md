@@ -18,7 +18,7 @@ To target the specific challenge of light perception on reflective materials, a 
 
 The original Colorment model was fine-tuned using the custom dataset described above.
 
-* **Training Duration:** The fine-tuning process was carried out for approximately 100 epochs.
+* **Training Duration:** The fine-tuning process was carried out for approximately 300 epochs.
 * **Goal:** The aim was to adapt the pre-trained model's weights to better specialize in interpreting and rendering the complex interplay of light on the aluminum surface across the different scenarios present in our dataset.
 
 ## Evaluation and Results
