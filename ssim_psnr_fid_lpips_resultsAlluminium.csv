@@ -1,0 +1,9 @@
+Folder,Average_SSIM,Average_PSNR,Average_LPIPS,Average_FID,Phase
+1_alluminium,0.8962,26.95,0.1019,131.3869,Pre-Finetuning
+2_alluminium,0.9696,22.52,0.1627,80.4282,Pre-Finetuning
+Overall_Average,0.9329,24.73,0.1323,105.9076,Pre-Finetuning
+
+
+1_alluminium,0.9476,30.32,0.0725,108.3196,Post-Finetuning
+2_alluminium,0.9787,23.97,0.1365,77.9222,Post-Finetuning
+Overall_Average,0.9631,27.15,0.1045,93.1209,Post-Finetuning
