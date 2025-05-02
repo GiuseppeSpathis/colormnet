@@ -11,8 +11,8 @@ To target the specific challenge of light perception on reflective materials, a 
     * **Color Contexts:** Warm lighting, cool lighting, and black & white environments.
     * **Luminosity:** Brightly lit scenes, dimly lit scenes, and transitions between bright and dim conditions.
 * **Objective:** This dataset is designed to train the model to better understand and reproduce the subtle and sometimes dramatic effects of changing light and color temperature on a reflective surface.
-* **Download:** The dataset is available for download here:
-    [Download Custom Video Dataset](https://liveunibo-my.sharepoint.com/:u:/g/personal/giuseppe_spathis_studio_unibo_it/Eev3GPxlMJpCuPoKQQ3CHdsBpysrXeM5c9C3-Ycl80oruw?e=Jt6Hq7)
+* **Download:** The dataset and results are available for download here:
+    [Download Custom Video Dataset](https://liveunibo-my.sharepoint.com/:u:/g/personal/giuseppe_spathis_studio_unibo_it/ERQ8RvxtrJJPjdi0dBw1758BsYztonCoCf0k7zNfWF5a8w?e=hcHFpV)
 
 ## Fine-tuning Process
 
@@ -50,8 +50,6 @@ The performance of the fine-tuned model was assessed through both qualitative an
 * **Detailed Report:** For a detailed breakdown of the quantitative results across the dataset, please refer to the spreadsheet: `ssim_results4000it.xlsx`. non e' vero questo file
 
 da aggiungere la questione dell'alluminio
-
-The dataset used to fine-tune the model and the results can be seen at this [link](https://liveunibo-my.sharepoint.com/:u:/g/personal/giuseppe_spathis_studio_unibo_it/ERQ8RvxtrJJPjdi0dBw1758BsYztonCoCf0k7zNfWF5a8w?e=hcHFpV)
 
 
 
