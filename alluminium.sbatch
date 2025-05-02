@@ -12,7 +12,6 @@
 #SBATCH --gres=gpu:1
 
 
-python /scratch.hpc/giuseppe.spathis/tuningScripts/evalAlluminium.py --pre_finetuning
+python /scratch.hpc/giuseppe.spathis/tuningScripts/evalAlluminium.py 
 
 
-python /scratch.hpc/giuseppe.spathis/tuningScripts/evalAlluminium.py
