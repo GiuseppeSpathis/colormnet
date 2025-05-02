@@ -30,15 +30,15 @@ The performance of the fine-tuned model was assessed through both qualitative an
 <table>
   <tr>
     <td align="center">
-      <strong>Psycho (gray scale)</strong><br>
+      <strong>ground truth</strong><br>
       <img src="https://github.com/GiuseppeSpathis/colormnet/blob/main/001.gif" alt="Psycho B&N Loop" width="300">
     </td>
     <td align="center">
-      <strong>Psycho Colored</strong><br>
+      <strong>Pre Tuning</strong><br>
       <img src="https://github.com/GiuseppeSpathis/colormnet/blob/main/001preTuning.gif" alt="Psycho Colored Loop" width="300">
     </td>
     <td align="center">
-      <strong>Psycho Post-Tuned</strong><br>
+      <strong>Post Tuning</strong><br>
       <img src="https://github.com/GiuseppeSpathis/colormnet/blob/main/001postTuning.gif" alt="Psycho Post-Tuned Loop" width="300">
     </td>
   </tr>
