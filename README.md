@@ -47,6 +47,11 @@ The performance of the fine-tuned model was assessed through both qualitative an
 ### Quantitative Analysis
 * **Metric:** The Structural Similarity Index (SSIM) was used to quantitatively measure the similarity between the model's output and ground truth frames.
 * **Results:** The fine-tuning resulted in a measurable improvement in the model's performance according to the SSIM metric. An average increase of **0.04** in the SSIM score was observed post-tuning.
-* **Detailed Report:** For a detailed breakdown of the quantitative results across the dataset, please refer to the spreadsheet: `ssim_results4000it.xlsx`.
+* **Detailed Report:** For a detailed breakdown of the quantitative results across the dataset, please refer to the spreadsheet: `ssim_results4000it.xlsx`. non e' vero questo file
+
+da aggiungere la questione dell'alluminio
+
+The dataset used to fine-tune the model and the results can be seen at this [link](https://liveunibo-my.sharepoint.com/:u:/g/personal/giuseppe_spathis_studio_unibo_it/ERQ8RvxtrJJPjdi0dBw1758BsYztonCoCf0k7zNfWF5a8w?e=hcHFpV)
+
 
 
