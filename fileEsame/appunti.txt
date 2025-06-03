@@ -1,0 +1,39 @@
+Spiegazione Paper Colormnet
+Paper del 2024
+
+I SLIDE INTRODUZIONE AL PROBLEMA
+
+Il task di colorare video in bianco e nero e' diventato negli ultimi anni molto importante poiche' tutti i film e video in bianco e nero registrati all'inizio del 900 non 
+possono sfruttare appieno le caratteristiche dei nuovi monitor e poi per una persona comune (tranne l'appassionato) risulta meno accattivante un video in bianco e nero 
+
+
+II SLIDE ANALISI DELLA LETTERATURA
+
+Questo task e' molto complesso, si potrebbe pensare semplicemente di usare una AI che fa image colorization e usarla per ogni frame ma questo ci da' risultati pessimi con 
+nessuna coerenza di colore fra i vari frame 
+
+
+Altri approcci con risultati migliori:
+- stack di frame lungo la direzione temporale: lavori su piu' frame contemporaneamente, richiede una grande memoria GPU 
+                                                (in base a quanto tempo vuoi considerare) e poi non sfrutti le informazioni di frame adiacenti (non sfrutti l'ordine dei frame)
+- reti ricorrenti: fa fatica a mantenere il contesto per lungo tempo (a sfruttare informazioni temporali molto distanti fra di loro)
+
+Un altro aspetto cruciale è l' estrazione di buone caratteristiche (features) da ogni frame. 
+I metodi esistenti spesso utilizzano reti neurali pre-allenate come VGG o ResNet-101. Queste reti sono efficaci nel modellare strutture locali, 
+ma meno nello sfruttare strutture non locali e semantiche, come ad esempio scene complesse con molti oggetti. 
+È quindi importante sviluppare un buon FEATURES EXTRACTOR che possa catturare meglio queste proprietà non locali e semantiche di ciascun frame.
+
+III SLIDE APPROCCIO PAPER IN BREVE
+per affrontare il problema il paper sviluppa una memory-based deep spatial-temporal feature propagation network per colorizzazione di video chiamata ColorMNet
+
+- capendo l'importanza delle features spaziali per prima cosa hanno sviluppato un modulo chiamato PVGFE (large-Pretrained Visual model Guided Feature Estimation)
+    modello pretrained su larga scala (su un grande dataset) che 
+    quindi grazie a questo (grande dataset) riesca a cogliere strutture non locali e la semantica (tipo e' quella in foto e' una penna)
+
+- per superare i problemi legati a reti ricorrenti e stack di frame in seguito viene proposto un modulo MFP (memory-based feature propagation)
+    che serve a esplorare e propagare in modo adattivo le features utili da frame distanti tra loro, riducendo al contempo il consumo di memoria.
+
+- Gli autori osservano che i frame adiacenti di un video di solito contengono contenuti simili. 
+    Sulla base di questa osservazione, hanno sviluppato un modulo LA (local attention) per utilizzare meglio le caratteristiche spaziali e temporali dei frame vicini.
+
+mettendo tutti assieme questi componenti hanno creato una rete trainable end-to-end chiamata ColorMNet
