@@ -61,6 +61,8 @@ il goal e' di sviluppare una rete che colori video in bianco e nero in maniera e
 
 mettendo tutti assieme questi componenti hanno creato una rete trainable end-to-end chiamata ColorMNet
 
+![design COLORMNET](images/design.PNG)
+
 ## IV SLIDE PVGFE MODULE 
 L'obiettivo principale del PVGFE è estrarre features spaziali robuste da ogni fotogramma in scala di grigi ($X_i$) del video. Per farlo, sfrutta le capacità di modelli visuali pre-allenati su larga scala, che sono bravi a modellare informazioni non locali e semantiche e sono robusti in diverse situazioni. L'idea è di combinare i punti di forza di due diversi tipi di modelli pre-allenati: DINOv2 (basato su Vision Transformer) e ResNet50.
 
@@ -144,7 +146,7 @@ col tempo pero' anche $A^K_1$ diventa troppo grande (z = $N_s$) e puo' creare pr
 
 caso z = $N_s$: 
 
-calcoliamo le similarita' {$S_γ, S_2γ, ..., S_zγ$} a partire da {K^F_γ, K^F_2γ, ..., K^F_zγ} dove $S_γ$ rappresenta quanto $K^F_γ$ somiglia a tutte le key features da γ + 1 a i - 1 usando la distanza euclidea, $S_γ$ sarebbe quanto le features di $K^F_γ$ sono riutilizzate nei K successivi, se un $K^F_γ$ e' molto simile ai successivi allora avra' valori alti di similarita' quindi sara' considerato utile e mantenuto (per mantenere la coerenza temporale)
+calcoliamo le similarita' {$S_γ, S_2γ, ..., S_zγ$} a partire da {$K^F_γ, K^F_2γ, ..., K^F_zγ$} dove $S_γ$ rappresenta quanto $K^F_γ$ somiglia a tutte le key features da γ + 1 a i - 1 usando la distanza euclidea, $S_γ$ sarebbe quanto le features di $K^F_γ$ sono riutilizzate nei K successivi, se un $K^F_γ$ e' molto simile ai successivi allora avra' valori alti di similarita' quindi sara' considerato utile e mantenuto (per mantenere la coerenza temporale)
 
 poi le similarita' vengono normalizzate
 
@@ -224,7 +226,7 @@ $Y_i = D(V_i + L_i)$
 
 ## VIII SLIDE TRAINING
 e' stato fatto il training usando il dataset DAVIS e Videvo e sono stati generati i video in bianco e nero con OpenCV, 
-il modello e' stato trainato su una RTX A6000 GPU con 48 GB, e' stato usato Adam come optimizer, batch size settato a 4, learning rate $2x10^{-5}$, γ = 5, Ne = 5, Ns = 10, M = 128 come loss hanno usato la MAE fra le immagini predette e le ground truth
+il modello e' stato trainato su una RTX A6000 GPU con 48 GB, e' stato usato Adam come optimizer, batch size settato a 4, learning rate $2x10^{-5}$, γ = 5, Ne = 5, Ns = 10, M = 128 come loss hanno usato la MAE fra le immagini predette e le ground truth e il training e' stato fatto per 160,000 iterazioni
 
 
 ## QUANTITATIVE RESULT
@@ -240,5 +242,9 @@ per le metriche per le analisi quanitative sono state considerate la PSNR, FID, 
 
 e' interessare notare come in un video che rappresenta l'ambiente reale in questo caso il video rappresenta Manhattan nel 1979 si ha (a) l'Input Frame, (b) immagine di esempio presa da Google Image Search, (c)-(e) sono colorization results da parte di DeepRemaster e DeepExemplar e (e) ColorMNet, (c)-(e) non colorano nel modo appropriato il muro del palazzo, gli alberi e il cielo invece ColorMNet presenta una colorazione molto realistica
 
-## ... SLIDE DESIGN
-![design COLORMNET](images/design.PNG)
+## MIEI ESPERIMENTI
+e' stato creato un dataset personalizzato al link 
+https://liveunibo-my.sharepoint.com/:u:/g/personal/giuseppe_spathis_studio_unibo_it/Eev3GPxlMJpCuPoKQQ3CHdsBpysrXeM5c9C3-Ycl80oruw?e=tLqcgj
+
+contenente circa 40 video con variazioni di luce, colore di sfondo 
+e' stato fatto fine tuning con batch size 2, numero di iterazioni sempre 160,000 
