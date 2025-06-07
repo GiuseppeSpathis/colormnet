@@ -18,6 +18,7 @@
 #poi devi rilanciare lo script per scaricare miniconda.sh e mettere come prefix scratch.../miniconda3 
 
 #install roba
+
 conda create -n colormnet python=3.8 
 source /scratch.hpc/giuseppe.spathis/miniconda3/etc/profile.d/conda.sh
 conda init --batch --prefix /scratch.hpc/giuseppe.spathis/miniconda3 > /dev/null 2>&1
@@ -33,5 +34,6 @@ conda install -y pandas
 conda install -y Pillow
 pip install pytorch-fid
 pip install lpips
-
-
+cd Pytorch-Correlation-extension/
+python setup.py install
+cd ..

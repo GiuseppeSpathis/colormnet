@@ -40,10 +40,10 @@ TEST_SET_DIR = os.path.join(BASE_DIR, "test_set")
 RESULTS_BASE_DIR = os.path.join(SCRATCH, "results")
 RESULTS_PRE_TUNING_BASE = os.path.join(RESULTS_BASE_DIR, "preTuning")
 RESULTS_POST_TUNING_BASE = os.path.join(RESULTS_BASE_DIR, "postTuning")
-FOLDERS_TO_PROCESS = ["001", "012"]
+FOLDERS_TO_PROCESS = ["001", "007"]
 ALUMINIUM_REGIONS: Dict[str, Dict[str, int]] = {
-    "001": {"center_x": 500, "center_y": 200, "rect_width": 500, "rect_height": 100},
-    "012": {"center_x": 450, "center_y": 160, "rect_width": 200, "rect_height": 300}
+    "001": {"center_x": 400, "center_y": 200, "rect_width": 600, "rect_height": 300},
+    "007": {"center_x": 450, "center_y": 350, "rect_width": 650, "rect_height": 300}
 }
 OUTPUT_CSV = os.path.join(SCRATCH, "evalAlluminium_InsideVsOutside_FIDReg.csv") # Nuovo nome CSV
 CUDA_DEVICE = "0"
