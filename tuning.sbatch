@@ -68,3 +68,5 @@ python /scratch.hpc/giuseppe.spathis/tuningScripts/evalSSIM.py --pre_finetuning
 #    --validation_root ./val_set\
 #    --savepath ./savingTuning
 
+# cd ../
+python /scratch.hpc/giuseppe.spathis/tuningScripts/evalSSIM.py

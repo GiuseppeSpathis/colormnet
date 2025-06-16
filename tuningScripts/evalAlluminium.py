@@ -8,13 +8,13 @@ from PIL import Image
 import time
 import glob
 from typing import Dict, Tuple, Optional, List
-import tempfile # Importato per gestire cartelle temporanee
+import tempfile 
 
-# Importa metriche
+
 from skimage.metrics import structural_similarity as ssim_metric
 from skimage.metrics import peak_signal_noise_ratio as psnr_metric
 
-# Import opzionali per LPIPS e FID
+
 try:
     import torch
     import lpips
@@ -33,7 +33,6 @@ except ImportError:
     print("Attenzione: Libreria 'pytorch-fid' non trovata. Calcolo FID non disponibile.")
 
 # --- Configurazione dei Path ---
-# (Come prima)
 SCRATCH = "/scratch.hpc/giuseppe.spathis/"
 BASE_DIR = os.path.join(SCRATCH, "colormnet")
 TEST_SET_DIR = os.path.join(BASE_DIR, "test_set")
@@ -45,16 +44,24 @@ ALUMINIUM_REGIONS: Dict[str, Dict[str, int]] = {
     "001": {"center_x": 400, "center_y": 200, "rect_width": 600, "rect_height": 300},
     "007": {"center_x": 450, "center_y": 350, "rect_width": 650, "rect_height": 300}
 }
-OUTPUT_CSV = os.path.join(SCRATCH, "evalAlluminium_InsideVsOutside_FIDReg.csv") # Nuovo nome CSV
+OUTPUT_CSV = os.path.join(SCRATCH, "evalAlluminium_InsideVsOutside_FIDReg.csv") 
 CUDA_DEVICE = "0"
 MAX_PIXEL_VALUE = 255.0
 
 # --- Funzioni Helper ---
+'''
+Calcola le slice di ritaglio e le maschere booleane per le regioni "dentro" e "fuori" un rettangolo.
 
+Questa funzione prende le coordinate di un rettangolo (centro, larghezza, altezza) e le dimensioni
+di un'immagine, quindi calcola le slice necessarie per ritagliare la regione definita dal
+rettangolo. Genera anche due maschere booleane di NumPy: una per i pixel all'interno del rettangolo
+e una per quelli all'esterno. Le coordinate del rettangolo vengono troncate per rimanere entro
+i bordi dell'immagine.
+'''
 def get_crop_slice_and_masks(coords: Dict[str, int], img_shape: Tuple[int, int]) -> \
     Optional[Tuple[Tuple[slice, slice], np.ndarray, np.ndarray]]:
-    """Restituisce: (crop_slice, mask_inside, mask_outside) o None."""
-    # (Implementazione come prima)
+    
+
     h, w = img_shape
     cx, cy = coords["center_x"], coords["center_y"]
     rw, rh = coords["rect_width"], coords["rect_height"]
@@ -73,19 +80,19 @@ def create_cropped_images_folder(
     source_folder: str,
     target_crop_folder: str,
     region_coords: Dict[str, int],
-    common_files: List[str] # Lista di nomi file da processare
+    common_files: List[str] 
     ) -> bool:
     """
     Crea una cartella con le versioni croppate delle immagini specificate.
     Restituisce True se ha successo (anche se 0 immagini sono state croppate),
-    False se c'è un errore grave.
+    False se c'è un errore.
     """
-    print(f"    Creazione crops in: {target_crop_folder}")
+    print(f"Creazione crops in: {target_crop_folder}")
     cropped_count = 0
     try:
         os.makedirs(target_crop_folder, exist_ok=True)
         if not common_files:
-             print(f"    Attenzione: Nessun file comune specificato per il crop da {source_folder}.")
+             print(f"Attenzione: Nessun file comune specificato per il crop da {source_folder}.")
              return True # Non è un errore, ma non c'è nulla da croppare
 
         for filename in common_files:
@@ -105,18 +112,18 @@ def create_cropped_images_folder(
                             img_cropped_pil.save(target_path)
                             cropped_count += 1
                         else:
-                            print(f"    Attenzione: Crop vuoto per {filename}, non salvato.")
+                            print(f"Attenzione: Crop vuoto per {filename}, non salvato.")
                     else:
-                        print(f"    Attenzione: Slice non valido per {filename}, non croppato.")
+                        print(f"Attenzione: Slice non valido per {filename}, non croppato.")
 
             except FileNotFoundError:
-                 print(f"    Errore: File non trovato durante il crop: {source_path}. Salto file.")
+                 print(f"Errore: File non trovato durante il crop: {source_path}. Salto file.")
                  continue # Continua con il prossimo file
             except Exception as e:
-                print(f"    Errore durante il crop/salvataggio di {filename}: {e}. Salto file.")
+                print(f"Errore durante il crop/salvataggio di {filename}: {e}. Salto file.")
                 continue # Continua con il prossimo file
 
-        print(f"    Croppate {cropped_count}/{len(common_files)} immagini da {os.path.basename(source_folder)}.")
+        print(f"Croppate {cropped_count}/{len(common_files)} immagini da {os.path.basename(source_folder)}.")
         return True # Successo anche se 0 immagini sono state effettivamente croppate
     except Exception as e:
         print(f"Errore grave durante la creazione della cartella crops {target_crop_folder}: {e}")
@@ -127,7 +134,7 @@ def create_cropped_images_folder(
 
 def calculate_fid(original_color_folder: str, result_color_folder: str, batch_size: int = 50, dims: int = 2048) -> Optional[float]:
     """Calcola FID tra due cartelle di immagini."""
-    # (Implementazione FID come prima, ora usata sia per Full che Region)
+   
     if not FID_AVAILABLE: return None
     # Path check
     if not os.path.isdir(original_color_folder) or not os.path.isdir(result_color_folder):
@@ -139,8 +146,7 @@ def calculate_fid(original_color_folder: str, result_color_folder: str, batch_si
              if glob.glob(os.path.join(folder, f'*{ext}')): return True
         return False
     if not has_images(original_color_folder) or not has_images(result_color_folder):
-        # Non stampare errore se le cartelle sono temporanee e potenzialmente vuote
-        # print(f"Errore FID: Nessuna immagine trovata in '{original_color_folder}' o '{result_color_folder}'")
+        
         return None
 
     try:
@@ -151,13 +157,10 @@ def calculate_fid(original_color_folder: str, result_color_folder: str, batch_si
                 cuda_device_idx = os.environ.get("CUDA_VISIBLE_DEVICES", "0").split(',')[0]
                 fid_device = f"cuda:{cuda_device_idx}"
             except Exception: fid_device = "cuda:0" if torch.cuda.is_available() else "cpu"
-        # print(f"    Calcolo FID con device '{fid_device}' tra: {os.path.basename(original_color_folder)} e {os.path.basename(result_color_folder)}")
         fid_value = calculate_fid_given_paths(paths, batch_size, fid_device, dims)
         if np.isnan(fid_value): return None
-        # print(f"    FID calcolato: {fid_value:.4f}")
         return fid_value
     except Exception as e:
-        # Non stampare l'errore completo ogni volta, potrebbe essere lungo
         print(f"    Errore durante il calcolo FID: {type(e).__name__}")
         return None
 
@@ -170,7 +173,6 @@ def calculate_metrics_inside_vs_outside(
     lpips_device: Optional[torch.device] = None
 ) -> Dict[str, Optional[float]]:
     """Calcola PSNR/SSIM (Region/Outside) e LPIPS (Region/Full)."""
-    # (Implementazione come nello script precedente)
     metrics = {
         "PSNR_Region": None, "PSNR_Outside": None,
         "SSIM_Region": None, "SSIM_Outside_Avg": None,
@@ -214,7 +216,7 @@ def calculate_metrics_inside_vs_outside(
                  if win_size_region % 2 == 0: win_size_region = max(1, win_size_region -1)
                  if win_size_region >= 3:
                       try: metrics["SSIM_Region"] = ssim_metric(img_orig_region_np, img_result_region_np, data_range=MAX_PIXEL_VALUE, channel_axis=-1, win_size=win_size_region)
-                      except ValueError: pass # Ignore win_size errors here
+                      except ValueError: pass 
             # Outside
             if win_size >= 3:
                 try:
@@ -223,7 +225,7 @@ def calculate_metrics_inside_vs_outside(
                     else: ssim_map_mean = ssim_map
                     outside_ssim_values = ssim_map_mean[mask_outside]
                     if outside_ssim_values.size > 0: metrics["SSIM_Outside_Avg"] = np.mean(outside_ssim_values)
-                except ValueError: pass # Ignore win_size errors here
+                except ValueError: pass 
         except Exception as e: print(f"Err SSIM {os.path.basename(original_path)}: {e}")
 
         # LPIPS
@@ -243,7 +245,7 @@ def calculate_metrics_inside_vs_outside(
     return metrics
 
 
-# --- Main Execution Logic ---
+# --- Main ---
 def main():
     print(f"\n{'='*60}")
     print(f"AVVIO CALCOLO METRICHE ALLUMINIO (Inside vs Outside + FID Regionale)")
@@ -255,15 +257,14 @@ def main():
     # Usa la variabile LPIPS_AVAILABLE definita a livello globale
     if LPIPS_AVAILABLE:
         try:
-            # Setup device (simplified fallback)
+            # Setup device 
             lpips_device = torch.device(f"cuda:{CUDA_DEVICE}" if torch.cuda.is_available() else "cpu")
             print(f"Utilizzo device '{lpips_device}' per LPIPS.")
             lpips_model = lpips.LPIPS(net='alex').to(lpips_device); lpips_model.eval()
             print("Modello LPIPS caricato.")
         except Exception as e:
             print(f"Errore inizializzazione LPIPS: {e}. Calcolo LPIPS non sarà possibile se il modello non è caricato.")
-            lpips_model = None # Assicura che sia None se l'inizializzazione fallisce
-            # RIMOSSA: LPIPS_AVAILABLE = False # Rimuovi questa riga che causava l'errore
+            lpips_model = None 
 
     results_list = []
     phases = ["preTuning", "postTuning"]
@@ -279,12 +280,12 @@ def main():
             result_color_folder = os.path.join(result_base_dir, folder_name)
             region_coords = ALUMINIUM_REGIONS.get(folder_name)
 
-            # Controlli preliminari (come prima)
+            # Controlli preliminari 
             if not os.path.isdir(original_color_folder) or not os.path.isdir(result_color_folder) or not region_coords:
                  print(f"ERRORE: Path o coordinate mancanti. Salto {folder_name}/{phase}.")
                  continue
 
-            # Trova file comuni (come prima)
+            # Trova file comuni 
             try:
                  original_files = sorted([f for f in os.listdir(original_color_folder) if f.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.tiff'))])
                  result_files = sorted([f for f in os.listdir(result_color_folder) if f.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.tiff'))])
@@ -397,7 +398,6 @@ def main():
 
 
     # --- Salva Risultati su CSV ---
-    # (Come prima)
     if not results_list:
         print("\nNessun risultato valido calcolato. Il file CSV non verrà creato.")
     else:
@@ -427,7 +427,6 @@ def main():
     print("="*60 + "\n")
 
 # --- Blocco di Esecuzione Principale ---
-# (Nessuna modifica necessaria qui)
 if __name__ == "__main__":
     os.environ["CUDA_VISIBLE_DEVICES"] = CUDA_DEVICE
     print(f"CUDA_VISIBLE_DEVICES={os.environ.get('CUDA_VISIBLE_DEVICES', 'Non impostato')}")

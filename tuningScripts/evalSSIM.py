@@ -5,14 +5,14 @@ import argparse
 import numpy as np
 import pandas as pd
 from PIL import Image
-import time  # Per dare tempo al filesystem, se necessario
-import glob # Per trovare i file da spostare
+import time  
+import glob 
 
-# Importa metriche già presenti
+
 from skimage.metrics import structural_similarity as ssim
 from skimage.metrics import peak_signal_noise_ratio as psnr
 
-# Import opzionali per LPIPS e FID (gestiti con try-except)
+# Import opzionali per LPIPS e FID 
 try:
     import torch
     import lpips
@@ -34,11 +34,11 @@ SCRATCH = "/scratch.hpc/giuseppe.spathis/"
 BASE_DIR = "/scratch.hpc/giuseppe.spathis/colormnet"
 TEST_SET_DIR = os.path.join(BASE_DIR, "test_set") # Cartella con sottocartelle (001, 002...) originali a colori
 
-# Directory usate NATIVAMENTE da test.py (come nello script originale)
+# Directory usate NATIVAMENTE da test.py 
 INPUT_DIR_BASE = os.path.join(BASE_DIR, "input")
 RESULT_DIR_BASE = os.path.join(BASE_DIR, "result")
-INPUT_SUBDIR_NAME = "blackswan"  # Ripristinato nome originale
-RESULT_SUBDIR_NAME = "blackswan" # Ripristinato nome originale
+INPUT_SUBDIR_NAME = "helmet"  
+RESULT_SUBDIR_NAME = "helmet" 
 INPUT_DIR = os.path.join(INPUT_DIR_BASE, INPUT_SUBDIR_NAME) # Path input grayscale usato da test.py
 RESULT_DIR = os.path.join(RESULT_DIR_BASE, RESULT_SUBDIR_NAME) # Path output colorizzato scritto da test.py
 
@@ -56,7 +56,7 @@ POST_FINETUNING_CHECKPOINT = "/scratch.hpc/giuseppe.spathis/colormnet/savingTuni
 
 # --- Funzioni Helper ---
 
-# Funzione clean_directory come nell'originale
+# Funzione clean_directory 
 def clean_directory(dir_path):
     """Rimuove tutti i file e le sottocartelle in una directory, creandola se non esiste."""
     print(f"Pulizia directory: {dir_path}")
@@ -74,14 +74,12 @@ def clean_directory(dir_path):
         print("Pulizia completata.")
     except Exception as e:
         print(f"Errore durante la pulizia di {dir_path}: {e}")
-        # Considera se rilanciare l'errore qui se la pulizia è critica
-        # raise
+        
 
-# Funzione prepare_input_images come nell'originale
+# Funzione prepare_input_images 
 def prepare_input_images(src_folder, dest_folder):
     """Copia le immagini da src a dest convertendole in scala di grigi."""
     print(f"Preparazione input grayscale da {src_folder} a {dest_folder}")
-    # Assicurati che dest_folder esista (clean_directory dovrebbe averla gestita)
     os.makedirs(dest_folder, exist_ok=True)
 
     image_files = sorted([f for f in os.listdir(src_folder) if f.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.tiff'))])
@@ -114,13 +112,12 @@ def prepare_input_images(src_folder, dest_folder):
 
     return prepared_count > 0
 
-# Funzione run_inference ESATTAMENTE come nell'originale (senza input/output args)
+# Funzione run_inference  
 def run_inference(script_path, cuda_device, is_pre_finetuning):
     """Esegue lo script di inferenza (che usa i suoi path interni),
        aggiungendo il checkpoint se non è pre-finetuning."""
     phase_info = "(Pre-Finetuning)" if is_pre_finetuning else "(Post-Finetuning)"
     print(f"Avvio inferenza {phase_info}: {script_path} su CUDA:{cuda_device}")
-    # Stampa le directory che test.py DOVREBBE usare internamente
     print(f"Input directory attesa INTERNAMENTE da test.py: {INPUT_DIR}")
     print(f"Output directory attesa INTERNAMENTE da test.py: {RESULT_DIR}")
 
@@ -134,11 +131,11 @@ def run_inference(script_path, cuda_device, is_pre_finetuning):
             print(f"ERRORE CRITICO: Checkpoint post-finetuning non trovato: {POST_FINETUNING_CHECKPOINT}")
             print("L'inferenza (post-finetuning) non può procedere senza il checkpoint specificato.")
             return False
-        checkpoint_arg_name = "--model"  # Come nell'originale
+        checkpoint_arg_name = "--model"  
         command.extend([checkpoint_arg_name, POST_FINETUNING_CHECKPOINT])
         print(f"Utilizzo checkpoint specificato per post-finetuning ({checkpoint_arg_name}): {POST_FINETUNING_CHECKPOINT}")
 
-    # Esecuzione come nell'originale
+    
     try:
         print(f"Esecuzione comando: {' '.join(command)}")
         # Esegui lo script dalla sua directory base
@@ -146,13 +143,11 @@ def run_inference(script_path, cuda_device, is_pre_finetuning):
         print("Inferenza completata con successo.")
         stderr_output = result.stderr.strip()
         if stderr_output:
-             # Potresti voler filtrare warning comuni qui se necessario
             print("Stderr dallo script di inferenza:\n", stderr_output)
         time.sleep(2) # Dai tempo al filesystem
         # Verifica se l'output directory attesa (RESULT_DIR) contiene file
         if not os.path.isdir(RESULT_DIR) or not os.listdir(RESULT_DIR):
              print(f"Attenzione: L'inferenza è terminata senza errori, ma la cartella di output attesa {RESULT_DIR} è vuota o non esiste.")
-             # Potrebbe essere un problema con test.py, ma l'esecuzione è ok
         return True
     except subprocess.CalledProcessError as e:
         print(f"Errore durante l'esecuzione dell'inferenza:")
@@ -160,7 +155,7 @@ def run_inference(script_path, cuda_device, is_pre_finetuning):
         print(f"Working Directory: {BASE_DIR}")
         print(f"Return code: {e.returncode}")
         print(f"Output (stdout): {e.stdout}")
-        print(f"Error (stderr): {e.stderr}") # Stampa l'errore stderr che hai visto prima
+        print(f"Error (stderr): {e.stderr}") 
         return False
     except FileNotFoundError:
         print(f"Errore: Script di inferenza non trovato: {script_path}")
@@ -170,7 +165,7 @@ def run_inference(script_path, cuda_device, is_pre_finetuning):
         return False
 
 
-# Funzione per spostare i risultati (questa rimane necessaria)
+# Funzione per spostare i risultati
 def move_results(source_dir, target_dir):
     """Sposta i file immagine da source_dir a target_dir."""
     print(f"Spostamento risultati da {source_dir} a {target_dir}")
@@ -203,7 +198,6 @@ def move_results(source_dir, target_dir):
             moved_count += 1
         except Exception as e:
             print(f"Errore durante lo spostamento di {filename} da {source_dir} a {target_dir}: {e}")
-            # Potresti voler accumulare errori invece di ritornare False subito
             continue
 
     if moved_count == 0 and len(files_to_move) > 0:
@@ -218,7 +212,6 @@ def move_results(source_dir, target_dir):
 
 
 # --- Funzioni per le Metriche (FID, SSIM, PSNR, LPIPS) ---
-#    (Queste funzioni rimangono sostanzialmente invariate rispetto all'ultima versione,
 #     leggono dalle cartelle che gli vengono passate)
 
 def calculate_fid(original_color_folder, result_color_folder, batch_size=50, dims=2048):
@@ -226,7 +219,6 @@ def calculate_fid(original_color_folder, result_color_folder, batch_size=50, dim
     if not FID_AVAILABLE:
         print("Calcolo FID saltato (libreria pytorch-fid non trovata).")
         return None
-    # ... (resto della funzione calculate_fid invariato) ...
     print(f"Calcolo FID tra: {original_color_folder} e {result_color_folder}")
     if not os.path.isdir(original_color_folder) or not os.listdir(original_color_folder):
         print(f"Errore FID: La cartella originale '{original_color_folder}' non esiste o è vuota.")
@@ -247,7 +239,7 @@ def calculate_fid(original_color_folder, result_color_folder, batch_size=50, dim
                   if not torch.cuda.is_available(): fid_device="cpu"
         print(f"Utilizzo device '{fid_device}' per FID.")
         fid_value = calculate_fid_given_paths(paths, batch_size, fid_device, dims)
-        if np.isnan(fid_value): # Aggiunto controllo NaN
+        if np.isnan(fid_value): 
              print(f"Attenzione: FID calcolato è NaN. Possibile problema con le immagini o attivazioni.")
              return None
         print(f"Calcolato FID: {fid_value:.4f}")
@@ -265,10 +257,6 @@ def calculate_metrics_for_folder(original_color_folder, result_color_folder):
     lpips_values = []
     lpips_model = None
     lpips_device = "cpu"
-    # ... (resto della funzione calculate_metrics_for_folder invariato,
-    #      inclusa inizializzazione LPIPS, verifica cartelle, loop sui file comuni,
-    #      calcolo SSIM, PSNR, LPIPS per coppia) ...
-
     # --- Inizializza LPIPS (solo se disponibile) ---
     if LPIPS_AVAILABLE:
         try:
@@ -390,7 +378,7 @@ def calculate_metrics_for_folder(original_color_folder, result_color_folder):
     return average_ssim, average_psnr, average_lpips, fid_value
 
 
-# --- Main Execution Logic (Aggiornato per usare la sequenza corretta) ---
+# --- Main  ---
 def main(is_pre_finetuning):
     phase_log = "Pre-Finetuning" if is_pre_finetuning else "Post-Finetuning"
     print(f"\n{'='*60}")
@@ -447,7 +435,7 @@ def main(is_pre_finetuning):
 
             # Fase 2: Esecuzione Inferenza (output va in RESULT_DIR)
             print("\nFase 2: Esecuzione Inferenza...")
-            # Usa la funzione run_inference originale!
+            # Usa la funzione run_inference 
             if not run_inference(INFERENCE_SCRIPT, CUDA_DEVICE, is_pre_finetuning):
                 print(f"Errore durante l'inferenza per {folder_name}. Salto spostamento e metriche.")
                 error_stage = 'Inference'
@@ -465,7 +453,7 @@ def main(is_pre_finetuning):
             # Fase 4: Calcolo Metriche (su target_result_dir)
             print("\nFase 4: Calcolo Metriche...")
             folder_ssim, folder_psnr, folder_lpips, folder_fid = calculate_metrics_for_folder(
-                original_frames_dir, target_result_dir # Leggi da originale e target finale!
+                original_frames_dir, target_result_dir # Leggi da originale e target finale
             )
             print("Fase 4: Completata.")
 
@@ -505,7 +493,6 @@ def main(is_pre_finetuning):
 
 
     # --- Calcola e Stampa Medie Totali ---
-    # ... (logica per calcolare medie e formattare stringhe come prima) ...
     print("\n" + "="*60)
     print(f"CALCOLO MEDIE COMPLESSIVE ({phase_log})")
     print("="*60)
@@ -525,7 +512,6 @@ def main(is_pre_finetuning):
 
 
     # --- Salva Risultati su CSV ---
-    # ... (logica per salvare il DataFrame come prima) ...
     if not results_list:
         print("\nNessun risultato da salvare nel CSV.")
     else:
@@ -555,7 +541,6 @@ def main(is_pre_finetuning):
 # --- Blocco di Esecuzione Principale ---
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Pipeline per colorizzazione, spostamento risultati e calcolo metriche (SSIM, PSNR, FID, LPIPS) per ColorMNet.")
-    # ... (argparse come prima) ...
     parser.add_argument(
         '--pre_finetuning',
         action='store_true',
@@ -563,7 +548,7 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    # ... (stampa modalità operativa e controlli preliminari come prima) ...
+    # stampa modalità operativa e controlli preliminari 
     if args.pre_finetuning:
         print("Modalità operativa: PRE-FINETUNING")
         print(f"I risultati verranno salvati in: {RESULTS_PRE_TUNING_BASE}")
@@ -591,8 +576,7 @@ if __name__ == "__main__":
             abort = True
     if abort: exit(1)
 
-    # Crea directory base INPUT/RESULT usate da test.py se non esistono
-    # clean_directory nel loop le svuoterà comunque
+    
     os.makedirs(INPUT_DIR, exist_ok=True)
     os.makedirs(RESULT_DIR, exist_ok=True)
 

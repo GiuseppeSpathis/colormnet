@@ -2,13 +2,11 @@ import os
 import glob
 import random
 import math
-import cv2 # Importa OpenCV
-import sys # Per uscire in caso di errori critici
+import cv2 
+import sys 
 
 # --- Configurazione dei Percorsi ---
-# Assicurati che questi percorsi siano corretti per il tuo sistema
 DATASET_BASE = '/scratch.hpc/giuseppe.spathis//dataset' # La cartella contenente le sottocartelle come bright2dark, context, etc.
-# Usa i percorsi assoluti che hai fornito
 TEST_SET_BASE = '/scratch.hpc/giuseppe.spathis/colormnet/test_set'
 TRAIN_SET_BASE = '/scratch.hpc/giuseppe.spathis/colormnet/train_set'
 VAL_SET_BASE = '/scratch.hpc/giuseppe.spathis/colormnet/val_set'
@@ -69,8 +67,8 @@ def process_video(video_path, set_base_path, width, height):
         # Apri il file video
         cap = cv2.VideoCapture(video_path)
         if not cap.isOpened():
-            print(f"    Error: Impossibile aprire il file video {video_path}")
-            return success # Restituisce False
+            print(f"Error: Impossibile aprire il file video {video_path}")
+            return success 
 
         frame_count = 0
         processed_frame_count = 0
@@ -89,7 +87,7 @@ def process_video(video_path, set_base_path, width, height):
                 # Usa INTER_AREA per il ridimensionamento, generalmente buono per ridurre
                 resized_frame = cv2.resize(frame, (width, height), interpolation=cv2.INTER_AREA)
             except Exception as e:
-                print(f"    Warning: Errore nel ridimensionare il frame {frame_count-1} da {video_filename}: {e}. Salto questo frame.")
+                print(f"Warning: Errore nel ridimensionare il frame {frame_count-1} da {video_filename}: {e}. Salto questo frame.")
                 continue # Salta al prossimo frame
 
             # Costruisci il nome del file di output per il frame (es. 00000.png, 00001.png)
@@ -100,21 +98,21 @@ def process_video(video_path, set_base_path, width, height):
                 cv2.imwrite(frame_filename, resized_frame)
                 processed_frame_count += 1
             except Exception as e:
-                 print(f"    Warning: Errore nel salvare il frame {processed_frame_count} su {frame_filename}: {e}. Salto questo frame.")
+                 print(f"Warning: Errore nel salvare il frame {processed_frame_count} su {frame_filename}: {e}. Salto questo frame.")
                  continue # Salta al prossimo frame
 
         # Se siamo qui, il loop è finito (fine video o break anticipato)
         if processed_frame_count > 0:
-             print(f"    Successo: Estratti e salvati {processed_frame_count} frame in {target_dir_path}")
+             print(f"Successo: Estratti e salvati {processed_frame_count} frame in {target_dir_path}")
              success = True
         elif frame_count > 0:
-             print(f"    Warning: Letto {frame_count} frame da {video_filename}, ma nessuno è stato salvato con successo in {target_dir_path}.")
+             print(f"Warning: Letto {frame_count} frame da {video_filename}, ma nessuno è stato salvato con successo in {target_dir_path}.")
         else:
-             print(f"    Warning: Nessun frame letto o salvato da {video_filename} in {target_dir_path}.")
+             print(f"Warning: Nessun frame letto o salvato da {video_filename} in {target_dir_path}.")
 
 
     except Exception as e:
-        print(f"    Errore generale durante l'elaborazione di {video_filename} in {target_dir_path}: {e}")
+        print(f"Errore generale durante l'elaborazione di {video_filename} in {target_dir_path}: {e}")
         success = False
 
     finally:
@@ -132,8 +130,7 @@ print(f"Directory Train set destinazione: {TRAIN_SET_BASE}")
 print(f"Directory Validation set destinazione: {VAL_SET_BASE}")
 print(f"Dimensioni target frame: {TARGET_WIDTH}x{TARGET_HEIGHT}")
 
-# Assicurati che le directory di destinazione base esistano
-# (Anche get_next_subdir_name lo fa, ma è buona norma essere espliciti)
+
 os.makedirs(TEST_SET_BASE, exist_ok=True)
 os.makedirs(TRAIN_SET_BASE, exist_ok=True)
 os.makedirs(VAL_SET_BASE, exist_ok=True)
@@ -161,7 +158,6 @@ for subdir_name in source_subdirs:
     print(f"\nElaborazione sottocartella sorgente: {current_source_path}")
 
     # Trova tutti i file .mp4 nella sottocartella corrente
-    # Usa recursive=False se non vuoi cercare in eventuali sottocartelle dentro subdir_name
     video_files = glob.glob(os.path.join(current_source_path, '*.mp4')) 
     
     n = len(video_files)
@@ -197,7 +193,7 @@ for subdir_name in source_subdirs:
         remaining = n - 3
         
         # Distribuisci il rimanente: ~50% test, ~40% train, ~10% val del *rimanente*
-        # Calcola gli addizionali arrotondando, assicurati che la somma sia corretta
+        # Calcola gli addizionali arrotondando
         add_test = round(remaining * 0.5)
         add_train = round(remaining * 0.4)
         # Il resto va a validation per far quadrare i conti
@@ -208,12 +204,11 @@ for subdir_name in source_subdirs:
         num_train += add_train
         num_val += add_val
         
-        print(f"  Assegnazione per {n} video: {num_test} a Test, {num_train} a Train, {num_val} a Validation.")
+        print(f"Assegnazione per {n} video: {num_test} a Test, {num_train} a Train, {num_val} a Validation.")
 
-    # Controlla che la somma faccia ancora 'n' (debug)
+    # Controlla che la somma faccia ancora 'n' 
     if num_test + num_train + num_val != n:
-         print(f"  ERRORE INTERNO: La somma delle assegnazioni ({num_test+num_train+num_val}) non corrisponde a n ({n}). Controllare la logica di divisione.")
-         # Potresti voler fermare lo script qui o solo segnalarlo
+         print(f"ERRORE INTERNO: La somma delle assegnazioni ({num_test+num_train+num_val}) non corrisponde a n ({n}). Controllare la logica di divisione.")
          total_errors += n # Considera tutti i video di questa cartella come errori
          continue # Salta l'elaborazione di questa cartella
 
@@ -222,7 +217,7 @@ for subdir_name in source_subdirs:
     successful_processing_count = 0
     
     # 1. Assegna e processa per Test Set
-    print(f"  -> Assegnazione {num_test} video a Test Set...")
+    print(f"Assegnazione {num_test} video a Test Set...")
     for i in range(num_test):
         video_to_process = video_files[files_assigned_count]
         if process_video(video_to_process, TEST_SET_BASE, TARGET_WIDTH, TARGET_HEIGHT):
@@ -230,7 +225,7 @@ for subdir_name in source_subdirs:
         files_assigned_count += 1
 
     # 2. Assegna e processa per Train Set
-    print(f"  -> Assegnazione {num_train} video a Train Set...")
+    print(f"Assegnazione {num_train} video a Train Set...")
     for i in range(num_train):
         video_to_process = video_files[files_assigned_count]
         if process_video(video_to_process, TRAIN_SET_BASE, TARGET_WIDTH, TARGET_HEIGHT):
@@ -238,7 +233,7 @@ for subdir_name in source_subdirs:
         files_assigned_count += 1
              
     # 3. Assegna e processa per Validation Set
-    print(f"  -> Assegnazione {num_val} video a Validation Set...")
+    print(f"Assegnazione {num_val} video a Validation Set...")
     for i in range(num_val):
         video_to_process = video_files[files_assigned_count]
         if process_video(video_to_process, VAL_SET_BASE, TARGET_WIDTH, TARGET_HEIGHT):
@@ -246,7 +241,7 @@ for subdir_name in source_subdirs:
         files_assigned_count += 1
 
     # Verifica finale per la sottocartella corrente
-    print(f"  Elaborazione completata per {subdir_name}: {successful_processing_count}/{n} video elaborati con successo.")
+    print(f"Elaborazione completata per {subdir_name}: {successful_processing_count}/{n} video elaborati con successo.")
     total_videos_processed += successful_processing_count
     if successful_processing_count < n:
         total_errors += (n - successful_processing_count)
