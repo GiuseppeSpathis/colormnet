@@ -66,7 +66,9 @@ def do_softmax(similarity, top_k: Optional[int]=None, inplace=False, return_usag
 
 def get_affinity(mk, ms, qk, qe):
     # shorthand used in training with no top-k
+    #calcola la similarità tra le chiavi di memoria e le chiavi di query
     similarity = get_similarity(mk, ms, qk, qe)
+    #Normalizza i punteggi di somiglianza per ottenere i pesi dell'attenzione
     affinity = do_softmax(similarity)
     return affinity
 

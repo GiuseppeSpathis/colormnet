@@ -248,3 +248,53 @@ https://liveunibo-my.sharepoint.com/:u:/g/personal/giuseppe_spathis_studio_unibo
 
 contenente circa 40 video con variazioni di luce, colore di sfondo 
 e' stato fatto fine tuning con batch size 2, numero di iterazioni sempre 160,000 
+
+
+
+### CODICE
+
+- cartella DATASET
+    - il file principale e' vos_dataset.py che prende in input il path del dataset e delle ground truth e applica delle trasformazioni (tipo rotazioni) per fare un po' di data augmentation
+
+    i path per il dataset glieli passi come parametri a train/py --davis_root e --validation_root e usa la classe util/configuration per gestirli
+
+- train.py
+    - gestisce il training, io ho fatto 1 stage (lo stage numero 2) col mio dataset (con questo numero di iterazioni gestito in configuration parser.add_argument('--s2_iterations', default=150000, type=int) # fine-tune means fewer augmentations to train the sensory memory
+        parser.add_argument('--s2_finetune', default=10000, type=int))
+    train sarebbe l'orchestrator che gestisce trainer.py, quando si arriva alla fase di fine tuning il data loader viene ricreato con il flag di fine tuning true, ovvero vengono tolte le trasformazioni di colore e le rotazioni vengono attenuate (si fa meno data augmentation per essere piu' precisi)
+
+- model/trainer.py 
+    - gestisce le cose tecniche da fare per il training tipo calcolare la loss, optimizer e cosi via 
+
+- model/network
+    - la classe ColorMNet gestisce tutta la pipeline del modello (la foto del design dell'architettura, importando i vari moduli tipo PVGFE)
+    - la funzione read_memory contiene il modulo MFP e usa le funzioni di memory_util
+    - la funzione read_memory_short contiene il modulo LA, presente in attention nella classe LocalGatedPropagation 
+
+    
+
+- model/modules 
+    - contiene il modulo PVGFE presente nella classe KeyEncoder_DINOv2_v6 in cui vengono estratte le feature di DINOv2 e ResNet50 e poi fuse assieme 
+
+- model/memory_util
+    - serve per gestire modulo MFP, get_similarity chiamata da get_affinity serve a calcolare la somiglianza fra query e chiavi
+
+- model/attention
+    - la classe LocalGatedPropagation gestisce la Local Attention
+
+- immagine di esempio
+    - nel training viene preso il primo frame di ground truth del video che vogliamo colorare
+    - in test time viene usata l'immagine presente nella cartella ref, come si vede in test.py nella riga parser.add_argument('--ref_path', default='ref')
+
+come funziona end to end
+1) Input: Un frame in bianco e nero f.
+2) Codifica Chiave (PVGFE): ColorMNet.encode_key(f) viene chiamata. Al suo interno, KeyEncoder_DINOv2_v6 estrae le feature multi-scala (f16, f8, f4). KeyProjection crea la query_key dalla feature f16.
+3) Recupero Memoria:
+    - Lungo Termine (MFP): ColorMNet.read_memory usa la query_key per recuperare informazioni (memory_readout_long) da frame distanti memorizzati.
+    - Breve Termine (LA): ColorMNet.read_memory_short usa la query_key per recuperare informazioni (memory_readout_short) da frame adiacenti.
+    - Le informazioni recuperate vengono combinate per formare il memory_readout finale.
+4) Decodifica e Output: ColorMNet.segment prende le feature multi-scala (f16, f8, f4) e il memory_readout. Le passa al Decoder (modules.py), che fonde queste informazioni e le upscala gradualmente per produrre la previsione del colore finale (logits). Durante questo processo, uno stato nascosto (hidden_state) viene aggiornato per mantenere la coerenza temporale.
+
+la parte del forward del modello con quindi il memory_readout che viene formato e' presente nella funzione do_pass del file model/trainer
+
+

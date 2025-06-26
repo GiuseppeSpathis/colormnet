@@ -718,7 +718,7 @@ class LocalGatedPropagation(nn.Module):
                  d_vu,
                  num_head,
                  dropout=0.,
-                 max_dis=7,
+                 max_dis=7, # 'max_dis' definisce la dimensione della finestra locale su cui calcolare l'attenzione 
                  dilation=1,
                  use_linear=True,
                  enable_corr=True,
@@ -826,6 +826,7 @@ class LocalGatedPropagation(nn.Module):
                                          h * w)
 
         if self.enable_corr:
+            # Calcola la correlazione solo all'interno della finestra locale
             qk = self.correlation_sampler(q, k).view(
                 n, self.num_head, self.window_size * self.window_size, h * w)
         else:
@@ -843,13 +844,13 @@ class LocalGatedPropagation(nn.Module):
         qk = qk + relative_emb
 
         qk -= qk_mask * 1e+8 if qk.dtype == torch.float32 else qk_mask * 1e+4
-
+        # Applica una softmax locale per ottenere i pesi dell'attenzione
         local_attn = linear_gate(qk, dim=2)
 
         local_attn = self.dropout(local_attn)
-
+        # Converte l'attenzione locale in una matrice di attenzione globale sparsa
         global_attn = self.local2global(local_attn, h, w)
-
+        # Aggrega i valori usando questa matrice di attenzione
         agg_value = (global_attn @ v.transpose(-2, -1)).permute(
             2, 0, 1, 3).reshape(h * w, n, -1)
 

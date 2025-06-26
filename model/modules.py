@@ -158,6 +158,7 @@ class ValueEncoder(nn.Module):
 class KeyEncoder_DINOv2_v6(nn.Module):
     def __init__(self):
         super().__init__()
+        # Usa un ResNet50 pre-addestrato come base
         network = resnet.resnet50(pretrained=True)
         self.conv1 = network.conv1
         self.bn1 = network.bn1
@@ -167,9 +168,9 @@ class KeyEncoder_DINOv2_v6(nn.Module):
         self.res2 = network.layer1 # 1/4, 256
         self.layer2 = network.layer2 # 1/8, 512
         self.layer3 = network.layer3 # 1/16, 1024
-
+        #riferimento a DINOv2
         self.network2 = resnet.Segmentor()
-
+        #layer per combinare le feature di ResNet e DINOv2
         self.fuse1 = resnet.Fuse(384 * 4, 1024) # n = [8, 9, 10, 11]
         self.fuse2 = resnet.Fuse(384 * 4, 512)
         self.fuse3 = resnet.Fuse(384 * 4, 256)
@@ -178,6 +179,7 @@ class KeyEncoder_DINOv2_v6(nn.Module):
         self.upsample4 = nn.Upsample(scale_factor=4, mode='bilinear')
 
     def forward(self, f):
+        # Estrazione feature con ResNet
         x = self.conv1(f) 
         x = self.bn1(x)
         x = self.relu(x)   # 1/2, 64
@@ -185,9 +187,9 @@ class KeyEncoder_DINOv2_v6(nn.Module):
         f4 = self.res2(x)   # 1/4, 256
         f8 = self.layer2(f4) # 1/8, 512
         f16 = self.layer3(f8) # 1/16, 1024
-
+        # Estrazione feature con DINOv2
         f16_dino = self.network2(f) # 1/14, 384  ->   interp to 1/16
-
+        # Fusione delle feature per produrre l'output multi-scala
         g16 = self.fuse1(f16_dino, f16)
         g8 = self.fuse2(self.upsample2(f16_dino), f8)
         g4 = self.fuse3(self.upsample4(f16_dino), f4)

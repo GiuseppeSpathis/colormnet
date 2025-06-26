@@ -220,18 +220,22 @@ class ColorMNetTrainer:
         wb_frames = []
         with torch.cuda.amp.autocast(enabled=self.config['amp']):
             # image features never change, compute once
+            # ... (codifica delle chiavi per tutti i frame) ...
             key, shrinkage, selection, f16, f8, f4 = self.model('encode_key', frames)
 
             filler_one = torch.zeros(1, dtype=torch.int64)
             hidden = torch.zeros((b, num_objects, self.config['hidden_dim'], *key.shape[-2:]))
 
+            # ... (codifica del valore per il primo frame) ...
             v16, hidden = self.model('encode_value', frames[:,0], f16[:,0], hidden, first_frame_gt[:,0])
             
             values = v16.unsqueeze(3) # add the time dimension
-
+            
+            # Loop sui frame successivi
             for ti in range(1, self.num_frames):
                 if ti <= self.num_ref_frames:
                     ref_values = values
+                    # ... (logica per selezionare i frame di riferimento per la memoria a lungo termine) ...
                     ref_keys = key[:,:,:ti]
                     ref_shrinkage = shrinkage[:,:,:ti] if shrinkage is not None else None
                 else:
@@ -252,13 +256,16 @@ class ColorMNetTrainer:
                     ], 0) if shrinkage is not None else None
 
                 # Segment frame ti
+                # 1. LETTURA DALLA MEMORIA A LUNGO TERMINE (MFP)
                 memory_readout = self.model('read_memory', key[:,:,ti], selection[:,:,ti] if selection is not None else None, 
                                         ref_keys, ref_shrinkage, ref_values)
                 
                 # short term memory
+                # 2. LETTURA DALLA MEMORIA A BREVE TERMINE (LA)
                 memory_readout_short = self.model('read_memory_short', key[:,:,ti], key[:,:,ti-1], values[:, :, :, ti-1])
+                # 3. FUSIONE DELLE MEMORIE
                 memory_readout += memory_readout_short
-
+                # 4. SEGMENTAZIONE (DECODER)
                 hidden, logits, masks = self.model('segment', (f16[:,ti], f8[:,ti], f4[:,ti]), memory_readout, 
                         hidden, selector, h_out=(ti < (self.num_frames-1)))
 

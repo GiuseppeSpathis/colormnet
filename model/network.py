@@ -26,7 +26,7 @@ class ColorMNet(nn.Module):
 
         self.single_object = config.get('single_object', False)
         print(f'Single object mode: {self.single_object}')
-
+        #PVGFE
         self.key_encoder = KeyEncoder_DINOv2_v6()
 
         self.value_encoder = ValueEncoder(self.value_dim, self.hidden_dim, self.single_object)
@@ -34,6 +34,7 @@ class ColorMNet(nn.Module):
         # Projection from f16 feature space to key/value space
         self.key_proj = KeyProjection(1024, self.key_dim) # 1024 -> 384 -> 3072
 
+        #Local Attention LA
         self.short_term_attn = LocalGatedPropagation(d_qk=64, # 256
                                           d_vu=512 * 2,
                                           num_head=1,
@@ -43,7 +44,7 @@ class ColorMNet(nn.Module):
                                           d_att=64, # 128
                                           max_dis=7,
                                           expand_ratio=1)
-
+        # Modulo che produce l'output finale
         self.decoder = Decoder(self.value_dim, self.hidden_dim)
 
         if model_weights is not None:
@@ -109,8 +110,9 @@ class ColorMNet(nn.Module):
         """
         batch_size, num_objects = memory_value.shape[:2]
         memory_value = memory_value.flatten(start_dim=1, end_dim=2)
-
+        # Calcola l'affinità (punteggio di attenzione) tra la query e le chiavi in memoria
         affinity = get_affinity(memory_key, memory_shrinkage, query_key, query_selection)
+         # Fa una somma pesata dei valori in memoria usando i punteggi di affinità
         memory = readout(affinity, memory_value)
         memory = memory.view(batch_size, num_objects, self.value_dim, *memory.shape[-2:])
 
@@ -223,3 +225,4 @@ class ColorMNet(nn.Module):
                     src_dict[k] = torch.cat([src_dict[k], pads], 1)
 
         self.load_state_dict(src_dict)
+
