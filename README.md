@@ -20,12 +20,12 @@ The original Colorment model was fine-tuned using the custom dataset described a
 
 * **Training Duration:** The fine-tuning process was carried out for approximately 300 epochs.
 * **Goal:** The aim was to adapt the pre-trained model's weights to better specialize in interpreting and rendering the complex interplay of light on the aluminum surface across the different scenarios present in our dataset.
-
+<!--
 ## Evaluation and Results
 
 The performance of the fine-tuned model was assessed through both qualitative and quantitative analysis.
 
-### Qualitative analysis Video Psycho
+### Qualitative analysis 
 
 <table>
   <tr>
@@ -50,6 +50,8 @@ The performance of the fine-tuned model was assessed through both qualitative an
 * **Detailed Report:** For a detailed breakdown of the quantitative results across the dataset, please refer to the spreadsheet: `ssim_results4000it.xlsx`. non e' vero questo file
 
 da aggiungere la questione dell'alluminio
+
+-->
 
 
 
